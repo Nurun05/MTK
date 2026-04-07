@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kuis Matematika Dasar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+        
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #FFFDF5;
+            color: #5D4037;
+        }
+
+        .cream-card {
+            background-color: white;
+            border: 1px solid #F3E5AB;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn-primary {
+            background-color: #D2B48C;
+            color: white;
+            transition: all 0.2s;
+        }
+
+        .btn-primary:hover {
+            background-color: #C1A37B;
+        }
+
+        .btn-outline {
+            border: 2px solid #F3E5AB;
+            color: #8D6E63;
+            transition: all 0.2s;
+        }
+
+        .btn-outline:hover {
+            background-color: #FDF5E6;
+        }
+
+        .progress-bar {
+            background-color: #D2B48C;
+            transition: width 0.5s ease-in-out;
+        }
+
+        .option-btn {
+            border: 2px solid #F3E5AB;
+            transition: all 0.2s;
+            text-align: left;
+            width: 100%;
+        }
+
+        .option-btn:hover:not(:disabled) {
+            border-color: #D2B48C;
+            background-color: #FFFDF5;
+        }
+
+        .animate-bounce-slow {
+            animation: bounce 2s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+    <div id="app" class="max-w-xl w-full cream-card rounded-3xl overflow-hidden relative">
+        <!-- Konten akan dimuat secara dinamis oleh JavaScript -->
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "Bilangan yang hanya memiliki dua faktor disebut...",
+                options: ["Bilangan asli", "Bilangan cacah", "Bilangan prima", "Bilangan ganjil"],
+                answer: "Bilangan prima",
+                hint: "Bilangan ini hanya bisa dibagi oleh 1 dan dirinya sendiri."
+            },
+            {
+                question: "Bilangan yang merupakan bilangan ganjil adalah...",
+                options: ["8", "5", "4", "2"],
+                answer: "5",
+                hint: "Bilangan ganjil adalah bilangan yang tidak habis dibagi dua."
+            },
+            {
+                question: "Nama bilangan yang benar dari 5.746 adalah...",
+                options: [
+                    "Lima tujuh empat enam",
+                    "Lima ribu tujuh empat enam",
+                    "Lima ribu tujuh ratus empat puluh enam",
+                    "Lima ribu tujuh ratus empat enam"
+                ],
+                answer: "Lima ribu tujuh ratus empat puluh enam",
+                hint: "Perhatikan nilai tempat ribuan, ratusan, puluhan, dan satuan."
+            },
+            {
+                question: "Lambang bilangan yang benar dari empat puluh ribu dua ratus tiga puluh delapan adalah...",
+                options: ["40.238", "48.230", "23.480", "42.380"],
+                answer: "40.238",
+                hint: "Tuliskan angkanya sesuai dengan urutan penyebutan nilai tempatnya."
+            },
+            {
+                question: "Ibu membawa 6/8 potong melon untuk dimakan bersama 4 orang temannya. Berapakah besar potongan melon yang diperoleh masing-masing?",
+                options: ["3/15", "3/16", "3", "4"],
+                answer: "3/16",
+                hint: "Gunakan operasi pembagian sederhana."
+            },
+            {
+                question: "Berapakah pecahan paling sederhana dari pecahan 16/24?",
+                options: ["4/6", "8/12", "2/6", "2/3"],
+                answer: "2/3",
+                hint: "Bagi pembilang dan penyebut dengan FPB dari 16 dan 24, yaitu 8."
+            },
+            {
+                question: "Sudut yang terbentuk antara 0 sampai dengan 90 derajat disebut dengan sudut...",
+                options: ["Sudut siku-siku", "Sudut tumpul", "Sudut lancip", "Sudut lurus"],
+                answer: "Sudut lancip",
+                hint: "Sudut ini lebih kecil daripada sudut siku-siku."
+            },
+            {
+                question: "Ibu Siwi memiliki 50 pensil berwarna. Pensil tersebut akan dibagikan kepada 10 tetangganya sama banyak. Berapa banyak pensil yang diterima setiap tetangganya?",
+                options: ["5", "10", "4", "2"],
+                answer: "5",
+                hint: "Gunakan operasi pembagian sederhana: 50 ÷ 10."
+            },
+            {
+                question: "Kakak mempunyai 12 kue. Semua kue itu ingin dibagikan kepada 4 orang adiknya dengan jumlah masing-masing yang sama banyak. Berapa banyak kue yang diberikan kakak kepada tiap adiknya?",
+                options: ["5", "6", "2", "3"],
+                answer: "3",
+                hint: "Bagikan total kue dengan jumlah adik."
+            },
+            {
+                question: "Hasil dari 250 : 5 : 2 = ...",
+                options: ["10", "25", "30", "15"],
+                answer: "25",
+                hint: "Kerjakan pembagian dari sebelah kiri terlebih dahulu."
+            }
+        ];
+
+        let state = {
+            view: 'home',
+            currentQuestion: 0,
+            score: 0,
+            answered: false,
+            selectedOption: null,
+            isCorrect: null
+        };
+
+        function render() {
+            const app = document.getElementById('app');
+            
+            if (state.view === 'home') {
+                app.innerHTML = `
+                    <div class="p-10 text-center flex flex-col items-center">
+                        <div class="bg-[#FDF5E6] p-8 rounded-full mb-6 shadow-inner">
+                            <i data-lucide="book-open" class="w-20 h-20 text-[#D2B48C]"></i>
+                        </div>
+                        <h1 class="text-3xl font-bold mb-4 text-[#5D4037]">Kuis Matematika Dasar</h1>
+                        <p class="text-[#8D6E63] mb-10 leading-relaxed max-w-sm">
+                            Halo! Mari uji kemampuan matematikamu hari ini dengan 10 soal seru.
+                        </p>
+                        <div class="w-full">
+                            <button onclick="startQuiz()" class="w-full btn-primary py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-lg active:scale-95">
+                                <i data-lucide="play" class="w-6 h-6 fill-current"></i>
+                                Mulai Kuis Sekarang
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (state.view === 'quiz') {
+                const q = quizData[state.currentQuestion];
+                const progress = ((state.currentQuestion + 1) / quizData.length) * 100;
+
+                app.innerHTML = `
+                    <div class="bg-[#FDF5E6] p-6 border-b border-[#F3E5AB]">
+                        <div class="flex justify-between items-center mb-4">
+                            <button onclick="setView('home')" class="flex items-center gap-2 px-3 py-1.5 bg-white/70 hover:bg-white rounded-xl transition-all text-sm font-bold border border-[#F3E5AB] text-[#8D6E63]">
+                                <i data-lucide="arrow-left" class="w-4 h-4"></i> Menu Utama
+                            </button>
+                            <span class="text-sm font-bold bg-[#F3E5AB] px-4 py-1.5 rounded-full text-[#5D4037]">
+                                Soal ${state.currentQuestion + 1} / ${quizData.length}
+                            </span>
+                        </div>
+                        <div class="w-full bg-[#EFEBE9] h-3 rounded-full overflow-hidden">
+                            <div class="progress-bar h-full" style="width: ${progress}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="p-6 md:p-10">
+                        <div class="mb-8 min-h-[80px] flex items-center">
+                            <h3 class="text-2xl font-semibold leading-snug text-[#5D4037]">${q.question}</h3>
+                        </div>
+                        
+                        <div class="space-y-4 mb-8">
+                            ${q.options.map(opt => `
+                                <button onclick="handleOptionSelect('${opt}')" ${state.answered ? 'disabled' : ''} 
+                                    class="option-btn p-5 rounded-2xl flex justify-between items-center text-lg
+                                    ${state.selectedOption === opt 
+                                        ? (state.isCorrect ? 'border-green-400 bg-green-50 text-green-700' : 'border-red-400 bg-red-50 text-red-700') 
+                                        : (state.answered && opt === q.answer ? 'border-green-400 bg-green-50 text-green-700' : '')
+                                    }
+                                    ${state.answered && state.selectedOption !== opt && opt !== q.answer ? 'opacity-40 scale-95' : ''}
+                                ">
+                                    <span class="font-medium">${opt}</span>
+                                    ${state.answered && opt === q.answer ? '<i data-lucide="check-circle" class="text-green-500 w-6 h-6"></i>' : ''}
+                                    ${state.answered && state.selectedOption === opt && !state.isCorrect ? '<i data-lucide="x-circle" class="text-red-500 w-6 h-6"></i>' : ''}
+                                </button>
+                            `).join('')}
+                        </div>
+
+                        <div class="flex flex-col gap-4">
+                            ${state.answered ? `
+                                <div class="p-5 rounded-2xl text-base ${state.isCorrect ? 'bg-green-50 text-green-800 border-green-200' : 'bg-red-50 text-red-800 border-red-200'} border animate-in fade-in slide-in-from-bottom-2 duration-300">
+                                    <p class="flex items-start gap-2">
+                                        <strong class="mt-1">${state.isCorrect ? 'Hebat! Jawaban Benar.' : 'Ayo Semangat Lagi!'}</strong>
+                                    </p>
+                                    ${!state.isCorrect ? `<p class="mt-1">Jawaban benar: <b>${q.answer}</b></p>` : ''}
+                                </div>
+                            ` : `
+                                <div class="bg-[#FFFDE7] p-4 rounded-xl text-sm border-l-4 border-[#FBC02D] text-[#795548]">
+                                    <p class="italic"><strong>Tips:</strong> ${q.hint}</p>
+                                </div>
+                            `}
+
+                            <button onclick="nextQuestion()" ${!state.answered ? 'disabled' : ''} 
+                                class="w-full py-5 rounded-2xl font-bold text-white text-lg flex items-center justify-center gap-2 transition-all
+                                ${state.answered ? 'btn-primary shadow-lg active:scale-95' : 'bg-[#E0E0E0] cursor-not-allowed'}">
+                                ${state.currentQuestion + 1 === quizData.length ? 'Lihat Skor Akhir' : 'Lanjut ke Soal Berikutnya'}
+                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            } else if (state.view === 'result') {
+                const finalScore = Math.round((state.score / quizData.length) * 100);
+                app.innerHTML = `
+                    <div class="p-10 text-center">
+                        <div class="mb-6 flex justify-center">
+                            <div class="bg-[#FFF9C4] p-8 rounded-full inline-block shadow-inner animate-bounce-slow">
+                                <i data-lucide="trophy" class="w-24 h-24 text-[#FBC02D]"></i>
+                            </div>
+                        </div>
+                        <h2 class="text-3xl font-bold mb-2">Luar Biasa!</h2>
+                        <p class="text-[#8D6E63] mb-8">Hasil perjuanganmu hari ini:</p>
+                        
+                        <div class="bg-[#FDF5E6] rounded-3xl p-8 mb-8 border border-[#F3E5AB] shadow-md">
+                            <div class="text-7xl font-black text-[#D2B48C] mb-2 tracking-tighter">${finalScore}</div>
+                            <p class="text-sm uppercase tracking-[0.2em] font-bold text-[#A1887F]">Skor Matematika</p>
+                            
+                            <div class="mt-8 grid grid-cols-2 gap-6">
+                                <div class="bg-white p-5 rounded-2xl shadow-sm border border-[#F3E5AB]">
+                                    <div class="text-3xl font-bold text-green-500">${state.score}</div>
+                                    <div class="text-sm text-[#A1887F] font-medium">Benar</div>
+                                </div>
+                                <div class="bg-white p-5 rounded-2xl shadow-sm border border-[#F3E5AB]">
+                                    <div class="text-3xl font-bold text-red-500">${quizData.length - state.score}</div>
+                                    <div class="text-sm text-[#A1887F] font-medium">Salah</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex flex-col gap-4">
+                            <button onclick="startQuiz()" class="w-full btn-primary py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 shadow-md active:scale-95">
+                                <i data-lucide="refresh-cw" class="w-5 h-5"></i> Coba Lagi
+                            </button>
+                            <button onclick="setView('home')" class="w-full btn-outline py-5 rounded-2xl font-bold text-lg flex items-center justify-center gap-3 active:scale-95">
+                                <i data-lucide="home" class="w-5 h-5"></i> Menu Utama
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            // Footer info
+            if (state.view !== 'quiz') {
+                const footer = document.createElement('div');
+                footer.className = "bg-[#FAFAFA] py-5 text-center text-xs text-[#A1887F] border-t border-[#F5F5F5] font-medium tracking-wide";
+                footer.innerHTML = "MATEMATIKA ITU MENYENANGKAN • 2026";
+                app.appendChild(footer);
+            }
+
+            lucide.createIcons();
+        }
+
+        function setView(viewName) {
+            state.view = viewName;
+            render();
+        }
+
+        function startQuiz() {
+            state = {
+                view: 'quiz',
+                currentQuestion: 0,
+                score: 0,
+                answered: false,
+                selectedOption: null,
+                isCorrect: null
+            };
+            render();
+        }
+
+        function handleOptionSelect(opt) {
+            if (state.answered) return;
+            state.selectedOption = opt;
+            state.answered = true;
+            state.isCorrect = (opt === quizData[state.currentQuestion].answer);
+            if (state.isCorrect) state.score++;
+            render();
+        }
+
+        function nextQuestion() {
+            if (state.currentQuestion + 1 < quizData.length) {
+                state.currentQuestion++;
+                state.answered = false;
+                state.selectedOption = null;
+                state.isCorrect = null;
+                render();
+            } else {
+                setView('result');
+            }
+        }
+
+        // Inisialisasi awal
+        render();
+    </script>
+</body>
+</html>
